@@ -488,7 +488,7 @@ class JoystickView @JvmOverloads constructor(
                 mButtonBitmap = d.bitmap
                 if (mButtonRadius != 0) {
                     mButtonBitmap = Bitmap.createScaledBitmap(
-                        mButtonBitmap,
+                        d.bitmap,
                         mButtonRadius * 2,
                         mButtonRadius * 2,
                         true);
@@ -783,7 +783,6 @@ class JoystickView @JvmOverloads constructor(
         mPaintBackground.isAntiAlias = true
         mPaintBackground.color = backgroundColor
         mPaintBackground.style = Paint.Style.FILL
-
 
         // Init Runnable for MultiLongPress
         mRunnableMultipleLongPress = Runnable { if (mOnMultipleLongPressListener != null) mOnMultipleLongPressListener!!.onMultipleLongPress() }
