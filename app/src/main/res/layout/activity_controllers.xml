@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ControllersActivity">
+
+    <io.github.controlwear.virtual.joystick.android.JoystickView
+        android:id="@+id/joystick"
+        android:layout_width="341dp"
+        android:layout_height="234dp"
+        app:JV_backgroundColor="#009688"
+        app:JV_borderColor="#00796B"
+        app:JV_borderWidth="4dp"
+        app:JV_buttonColor="@android:color/holo_purple"
+        app:JV_buttonSizeRatio="15%"
+        app:JV_fixedCenter="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.755"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.806" />
+
+    <SeekBar
+        android:id="@+id/rudder_bar"
+        android:layout_width="222dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.76"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/joystick" />
+
+    <FrameLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="32dp"
+        android:layout_height="192dp"
+        app:layout_constraintBottom_toBottomOf="@+id/joystick"
+        app:layout_constraintEnd_toStartOf="@+id/joystick"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/joystick">
+
+        <SeekBar
+            android:id="@+id/throttle_bar"
+            android:layout_width="192dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center"
+            android:rotation="270" />
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/aileronTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="aileron"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/joystick"
+        app:layout_constraintEnd_toEndOf="@+id/joystick"
+        app:layout_constraintStart_toStartOf="@+id/joystick" />
+
+    <TextView
+        android:id="@+id/elevatorTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        android:text="elevator"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/joystick"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/joystick"
+        app:layout_constraintTop_toBottomOf="@+id/aileronTextView" />
+
+    <TextView
+        android:id="@+id/aileronValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/aileronTextView"
+        app:layout_constraintEnd_toStartOf="@+id/elevatorTextView"
+        app:layout_constraintStart_toStartOf="@+id/joystick"
+        app:layout_constraintTop_toTopOf="@+id/joystick" />
+
+    <TextView
+        android:id="@+id/elevatorValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/elevatorTextView"
+        app:layout_constraintTop_toBottomOf="@+id/elevatorTextView" />
+
+    <TextView
+        android:id="@+id/throttleValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toStartOf="@+id/joystick"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/frameLayout" />
+
+    <TextView
+        android:id="@+id/throttleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="throttle"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/joystick"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/throttleValue" />
+
+    <TextView
+        android:id="@+id/rudderValue"
+        android:layout_width="36dp"
+        android:layout_height="21dp"
+        android:layout_marginBottom="16dp"
+        android:text=""
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/rudderTextView"
+        app:layout_constraintEnd_toEndOf="@+id/rudder_bar"
+        app:layout_constraintStart_toStartOf="@+id/rudder_bar"
+        app:layout_constraintTop_toBottomOf="@+id/rudder_bar" />
+
+    <TextView
+        android:id="@+id/rudderTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="rudder"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/rudder_bar"
+        app:layout_constraintStart_toStartOf="@+id/rudder_bar"
+        app:layout_constraintTop_toBottomOf="@+id/rudder_bar" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
