@@ -3,21 +3,27 @@ package com.example.flightmobileapp
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import com.google.gson.GsonBuilder
 import io.github.controlwear.virtual.joystick.android.JoystickView
 import kotlinx.android.synthetic.main.activity_controllers.*
+import okhttp3.MediaType
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.IOException
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
+//import kotlinx.coroutines.CoroutineScope
+//import kotlinx.coroutines.Dispatchers.IO
 
 class ControllersActivity : AppCompatActivity() {
 
@@ -33,7 +39,7 @@ class ControllersActivity : AppCompatActivity() {
 
         setBarListeners()
         setJoystickListeners()
-
+        sendValues()
         loadImageLoop()
     }
 
@@ -50,7 +56,7 @@ class ControllersActivity : AppCompatActivity() {
                 elevator = roundedY
                 println("Changed $aileron")
                 println("and $elevator")
-                //send();
+                sendValues()
             }
         })
     }
@@ -61,7 +67,7 @@ class ControllersActivity : AppCompatActivity() {
                 throttleValue.text = (i / 100.0).toString()
                 if (changedEnough100(i / 100.0, throttle)) {
                     throttle = i / 100.0
-                    // send()
+                    sendValues()
                 }
             }
 
@@ -74,6 +80,7 @@ class ControllersActivity : AppCompatActivity() {
             }
         })
 
+        // set a listener to the rudder slider
         rudder_bar.max = 200
         rudder_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
@@ -81,13 +88,15 @@ class ControllersActivity : AppCompatActivity() {
                     rudderValue.text = ((i / 100.0) - 1).toString()
                     if (changedEnough100((i / 100.0) - 1, throttle)) {
                         rudder = (i / 100.0) - 1
-                        // send()
+
+                        //CoroutineScope(IO).launch { sendValues() }
+                        sendValues()
                     }
                 } else {
                     rudderValue.text = ((i - 100.0) / 100).toString()
                     if (changedEnough100((i - 100.0) / 100, throttle)) {
                         rudder = (i - 100.0) / 100
-                        // send()
+                        sendValues()
                     }
                 }
             }
@@ -102,7 +111,7 @@ class ControllersActivity : AppCompatActivity() {
         })
 
     }
-
+    // Check if 1% of the value has changed. when 1% = 0.02.
     private fun changedEnough200(newValue: Double, prevValue: Double): Boolean {
         if ((newValue > prevValue) && (newValue - prevValue) >= 0.02) {
             return true
@@ -111,7 +120,7 @@ class ControllersActivity : AppCompatActivity() {
         }
         return false
     }
-
+    // Check if 1% of the value has changed. when 1% = 0.01.
     private fun changedEnough100(newValue: Double, prevValue: Double): Boolean {
         if ((newValue > prevValue) && (newValue - prevValue) >= 0.01) {
             return true
@@ -128,9 +137,9 @@ class ControllersActivity : AppCompatActivity() {
      */
 
     private fun loadImageLoop() {
-        val URL = "http://10.0.2.2:5550/"
+        val url = "http://10.0.2.2:5550/"
         val gson = GsonBuilder().setLenient().create()
-        val retrofit =  Retrofit.Builder().baseUrl(URL)
+        val retrofit =  Retrofit.Builder().baseUrl(url)
             .addConverterFactory(GsonConverterFactory.create(gson)).build()
         val api = retrofit.create(GetImageService::class.java)
 
@@ -149,4 +158,31 @@ class ControllersActivity : AppCompatActivity() {
             }
         })
     }
+
+    private fun sendValues() {
+        val json =  "{\"aileron\": $aileron,\n \"rudder\": $rudder,\n \"elevator\": $elevator,\n \"throttle\": $throttle\n}"
+        val rb = RequestBody.create(MediaType.parse("application/json"), json)
+        val gson = GsonBuilder().setLenient().create()
+        val retrofit = Retrofit.Builder()
+            .baseUrl(("http://10.0.2.2:5550/"))
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+        val api = retrofit.create(GetImageService::class.java)
+        val body = api.postCommand(rb).enqueue(object : Callback<ResponseBody> {
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+            }
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                try {
+                    Log.d("FlightMobileApp", response.body().toString())
+                    println("make the update correctly")
+
+                }
+                catch (e: IOException) {
+                    e.printStackTrace()
+                    println("failed to make any post: catch")
+                }
+            }
+        })
+    }
+
 }

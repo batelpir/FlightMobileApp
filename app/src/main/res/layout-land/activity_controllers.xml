@@ -18,10 +18,10 @@
         app:JV_fixedCenter="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.745"
+        app:layout_constraintHorizontal_bias="0.16"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.822" />
+        app:layout_constraintVertical_bias="0.378" />
 
     <SeekBar
         android:id="@+id/rudder_bar"
@@ -32,9 +32,10 @@
         android:layout_marginBottom="32dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.76"
+        app:layout_constraintHorizontal_bias="0.106"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/joystick" />
+        app:layout_constraintTop_toBottomOf="@+id/joystick"
+        app:layout_constraintVertical_bias="0.8" />
 
     <FrameLayout
         android:id="@+id/frameLayout"
@@ -68,26 +69,13 @@
         android:id="@+id/elevatorTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="32dp"
+        android:layout_marginEnd="16dp"
         android:text="elevator"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/joystick"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/joystick"
-        app:layout_constraintTop_toBottomOf="@+id/aileronTextView" />
-
-    <TextView
-        android:id="@+id/aileronValue"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="20dp"
-        android:text="0.0"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/aileronTextView"
-        app:layout_constraintEnd_toStartOf="@+id/elevatorTextView"
-        app:layout_constraintStart_toStartOf="@+id/joystick"
+        app:layout_constraintEnd_toEndOf="@+id/divider2"
         app:layout_constraintTop_toTopOf="@+id/joystick" />
+
 
     <TextView
         android:id="@+id/elevatorValue"
@@ -96,7 +84,8 @@
         android:layout_marginEnd="16dp"
         android:text="0.0"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/elevatorTextView"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/elevatorTextView"
         app:layout_constraintTop_toBottomOf="@+id/elevatorTextView" />
 
@@ -124,8 +113,6 @@
         android:id="@+id/rudderValue"
         android:layout_width="36dp"
         android:layout_height="21dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
         android:text="-1.0"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/rudderTextView"
@@ -145,14 +132,25 @@
         app:layout_constraintTop_toBottomOf="@+id/rudder_bar" />
 
     <View
-        android:id="@+id/divider"
-        android:layout_width="409dp"
-        android:layout_height="1dp"
+        android:id="@+id/divider2"
+        android:layout_width="1dp"
+        android:layout_height="409dp"
         android:background="?android:attr/listDivider"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/aileronValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="0.0"
+        app:layout_constraintBottom_toBottomOf="@+id/aileronTextView"
+        app:layout_constraintEnd_toEndOf="@+id/joystick"
+        app:layout_constraintStart_toStartOf="@+id/joystick"
+        app:layout_constraintTop_toTopOf="@+id/joystick" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
