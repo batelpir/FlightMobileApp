@@ -1,16 +1,23 @@
 package com.example.flightmobileapp
 
-import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
+import android.graphics.BitmapFactory
+import android.icu.util.TimeUnit
 import android.os.Bundle
 import android.util.Log
+import android.widget.ImageView
 import android.widget.SeekBar
-import android.widget.TextView
-import androidx.annotation.RequiresApi
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.GsonBuilder
 import io.github.controlwear.virtual.joystick.android.JoystickView
 import kotlinx.android.synthetic.main.activity_controllers.*
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import okhttp3.MediaType
+import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -22,8 +29,7 @@ import java.io.IOException
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
-//import kotlinx.coroutines.CoroutineScope
-//import kotlinx.coroutines.Dispatchers.IO
+
 
 class ControllersActivity : AppCompatActivity() {
 
@@ -32,6 +38,8 @@ class ControllersActivity : AppCompatActivity() {
     private var rudder = 0.0;
     private var throttle = 0.0;
 
+    private var imageChanged = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +47,7 @@ class ControllersActivity : AppCompatActivity() {
 
         setBarListeners()
         setJoystickListeners()
-        sendValues()
+        //CoroutineScope(IO).launch {sendValues()}
         loadImageLoop()
     }
 
@@ -56,7 +64,7 @@ class ControllersActivity : AppCompatActivity() {
                 elevator = roundedY
                 println("Changed $aileron")
                 println("and $elevator")
-                sendValues()
+                CoroutineScope(IO).launch {sendValues()}
             }
         })
     }
@@ -67,7 +75,7 @@ class ControllersActivity : AppCompatActivity() {
                 throttleValue.text = (i / 100.0).toString()
                 if (changedEnough100(i / 100.0, throttle)) {
                     throttle = i / 100.0
-                    sendValues()
+                    CoroutineScope(IO).launch {sendValues()}
                 }
             }
 
@@ -90,13 +98,13 @@ class ControllersActivity : AppCompatActivity() {
                         rudder = (i / 100.0) - 1
 
                         //CoroutineScope(IO).launch { sendValues() }
-                        sendValues()
+                        CoroutineScope(IO).launch{sendValues()}
                     }
                 } else {
                     rudderValue.text = ((i - 100.0) / 100).toString()
                     if (changedEnough100((i - 100.0) / 100, throttle)) {
                         rudder = (i - 100.0) / 100
-                        sendValues()
+                        // send()
                     }
                 }
             }
@@ -136,27 +144,78 @@ class ControllersActivity : AppCompatActivity() {
     from the server.
      */
 
-    private fun loadImageLoop() {
-        val url = "http://10.0.2.2:5550/"
+    private fun loadImage() {
+        val URL = "http://10.0.2.2:5550/"
+
+        val client = OkHttpClient.Builder()
+            .connectTimeout(100, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(100, java.util.concurrent.TimeUnit.SECONDS).build()
+
         val gson = GsonBuilder().setLenient().create()
-        val retrofit =  Retrofit.Builder().baseUrl(url)
+
+        val retrofit =  Retrofit.Builder().baseUrl(URL)
             .addConverterFactory(GsonConverterFactory.create(gson)).build()
+
         val api = retrofit.create(GetImageService::class.java)
 
         val body = api.getImg().enqueue(object: Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if(response.isSuccessful) {
                     println("OK")
+
+                    val inputstream = response?.body()?.byteStream()
+                    val bitmap = BitmapFactory.decodeStream(inputstream)
+                    runOnUiThread {
+                        val imageView = findViewById<ImageView>(R.id.imageView)
+                        imageView.setImageBitmap(bitmap)
+                        println("debug:got image succsesfuly")
+                    }
                 } else {
                     println("NOTOK")
                 }
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                t.printStackTrace();
-                println("Not yet implemented")
+                t.printStackTrace()
+                Toast.makeText(applicationContext, "Failed to load new screen",
+                    Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    val handler = CoroutineExceptionHandler { _, exception ->
+        Log.v("Network", "Caught $exception")
+    }
+
+    private fun loadImageLoop() {
+        imageChanged = true
+        CoroutineScope(IO).launch(handler) {
+            while (imageChanged) {
+                loadImage()
+                delay(2000)
+            }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (!imageChanged) {
+            loadImage()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if(!imageChanged) {
+            loadImage()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (imageChanged) {
+            imageChanged = false
+        }
     }
 
     private fun sendValues() {
@@ -180,6 +239,7 @@ class ControllersActivity : AppCompatActivity() {
                 catch (e: IOException) {
                     e.printStackTrace()
                     println("failed to make any post: catch")
+
                 }
             }
         })
