@@ -80,11 +80,9 @@ class ControllersActivity : AppCompatActivity() {
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {
-                //TODO("Not yet implemented")
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
-                //TODO("Not yet implemented")
             }
         })
 
@@ -110,11 +108,9 @@ class ControllersActivity : AppCompatActivity() {
             }
 
             override fun onStartTrackingTouch(p0: SeekBar) {
-                //TODO("Not yet implemented")
             }
 
             override fun onStopTrackingTouch(p0: SeekBar) {
-                //TODO("Not yet implemented")
             }
         })
 
@@ -143,7 +139,6 @@ class ControllersActivity : AppCompatActivity() {
     A function create to build a retrofit object to make GET request for image
     from the server.
      */
-
     private fun loadImage() {
         val URL = "http://10.0.2.2:5550/"
 
