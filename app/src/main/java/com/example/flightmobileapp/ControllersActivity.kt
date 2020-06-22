@@ -1,7 +1,7 @@
 package com.example.flightmobileapp
 
 import android.graphics.BitmapFactory
-import android.icu.util.TimeUnit
+//import android.icu.util.TimeUnit
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageView
@@ -39,11 +39,18 @@ class ControllersActivity : AppCompatActivity() {
     private var throttle = 0.0;
 
     private var imageChanged = false
+    private var url : String = ""
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_controllers)
+
+        val extras = intent.extras
+        if (extras != null) {
+            url = extras!!.getString("url").toString()
+        }
+
 
         setBarListeners()
         setJoystickListeners()
@@ -95,14 +102,14 @@ class ControllersActivity : AppCompatActivity() {
                     if (changedEnough100((i / 100.0) - 1, throttle)) {
                         rudder = (i / 100.0) - 1
 
-                        //CoroutineScope(IO).launch { sendValues() }
                         CoroutineScope(IO).launch{sendValues()}
                     }
                 } else {
                     rudderValue.text = ((i - 100.0) / 100).toString()
                     if (changedEnough100((i - 100.0) / 100, throttle)) {
                         rudder = (i - 100.0) / 100
-                        // send()
+
+                        CoroutineScope(IO).launch{sendValues()}
                     }
                 }
             }
@@ -140,7 +147,7 @@ class ControllersActivity : AppCompatActivity() {
     from the server.
      */
     private fun loadImage() {
-        val URL = "http://10.0.2.2:5550/"
+        //val URL = "http://10.0.2.2:5550/"
 
         val client = OkHttpClient.Builder()
             .connectTimeout(100, java.util.concurrent.TimeUnit.SECONDS)
@@ -148,7 +155,7 @@ class ControllersActivity : AppCompatActivity() {
 
         val gson = GsonBuilder().setLenient().create()
 
-        val retrofit =  Retrofit.Builder().baseUrl(URL)
+        val retrofit =  Retrofit.Builder().baseUrl(url)
             .addConverterFactory(GsonConverterFactory.create(gson)).build()
 
         val api = retrofit.create(GetImageService::class.java)
@@ -218,12 +225,15 @@ class ControllersActivity : AppCompatActivity() {
         val rb = RequestBody.create(MediaType.parse("application/json"), json)
         val gson = GsonBuilder().setLenient().create()
         val retrofit = Retrofit.Builder()
-            .baseUrl(("http://10.0.2.2:5550/"))
+            .baseUrl((url))
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
         val api = retrofit.create(GetImageService::class.java)
         val body = api.postCommand(rb).enqueue(object : Callback<ResponseBody> {
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                //t.printStackTrace()
+                //Toast.makeText(applicationContext, "Failed to send values",
+                  //  Toast.LENGTH_SHORT).show()
             }
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 try {

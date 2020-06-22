@@ -6,6 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".ControllersActivity">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#eec1b4"
+        android:orientation="vertical"
+        tools:context=".MainActivity"/>
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="0dp"
@@ -23,7 +29,7 @@
         app:JV_backgroundColor="#009688"
         app:JV_borderColor="#00796B"
         app:JV_borderWidth="4dp"
-        app:JV_buttonColor="@android:color/holo_purple"
+        app:JV_buttonColor="@color/material_on_background_emphasis_high_type"
         app:JV_buttonSizeRatio="15%"
         app:JV_fixedCenter="false"
         app:layout_constraintBottom_toBottomOf="parent"
