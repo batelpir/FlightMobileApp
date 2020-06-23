@@ -78,9 +78,10 @@ class MainActivity : AppCompatActivity() {
             val retrofit = Retrofit.Builder().baseUrl(url)
                 .addConverterFactory(GsonConverterFactory.create(gson)).build()
 
-            val api = retrofit.create(GetImageService::class.java)
+            val api = retrofit.create(Api::class.java)
+
             /** Send a http request for getting screenshot and handle response. */
-            val body = api.getImg().enqueue(object: Callback<ResponseBody> {
+            val body = api.getImg().enqueue(object : Callback<ResponseBody> {
                 override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                     Toast.makeText(
                         applicationContext,
@@ -90,8 +91,11 @@ class MainActivity : AppCompatActivity() {
                     return
                 }
 
-                override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                    if(response.isSuccessful) {
+                override fun onResponse(
+                    call: Call<ResponseBody>,
+                    response: Response<ResponseBody>
+                ) {
+                    if (response.isSuccessful) {
                         openActivity(url)
                     } else {
                         Toast.makeText(
@@ -102,9 +106,8 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             })
-        }
-        catch (e : Exception) {
-                Toast.makeText(
+        } catch (e: Exception) {
+            Toast.makeText(
                 applicationContext,
                 "Connection failed",
                 Toast.LENGTH_SHORT

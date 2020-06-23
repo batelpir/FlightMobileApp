@@ -39,8 +39,11 @@ class ControllersActivity : AppCompatActivity() {
     private var throttle = 0.0;
 
     private var imageChanged = false
-    private var url : String = ""
+    private var url: String = ""
 
+    val handler = CoroutineExceptionHandler { _, exception ->
+        Log.v("Network", "Caught $exception")
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,49 +54,46 @@ class ControllersActivity : AppCompatActivity() {
             url = extras!!.getString("url").toString()
         }
 
-
         setBarListeners()
         setJoystickListeners()
-        //CoroutineScope(IO).launch {sendValues()}
         loadImageLoop()
     }
 
+    /**
+     * Find and update the values of 'aileron' and 'elevator'.
+     */
     private fun setJoystickListeners() {
         joystick.setOnMoveListener(JoystickView.OnMoveListener() { angle: Int, strength: Int ->
             val x = strength * cos(Math.toRadians(angle * 1.0))
             val y = strength * sin(Math.toRadians(angle * 1.0))
             val roundedX = x.roundToInt() / 100.0
             val roundedY = y.roundToInt() / 100.0
+            /** Displays the found values. */
             aileronValue.text = roundedX.toString()
             elevatorValue.text = roundedY.toString()
             if (changedEnough200(roundedX, aileron) || changedEnough200(roundedY, elevator)) {
                 aileron = roundedX
                 elevator = roundedY
-                println("Changed $aileron")
-                println("and $elevator")
-                CoroutineScope(IO).launch {sendValues()}
+
+                /** Update the server that a value has changed. */
+                CoroutineScope(IO).launch { sendValues() }
             }
         })
     }
 
+    /**
+     *  Find and update the values of 'rudder' and 'throttle'.
+     */
     private fun setBarListeners() {
-        throttle_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
-                throttleValue.text = (i / 100.0).toString()
-                if (changedEnough100(i / 100.0, throttle)) {
-                    throttle = i / 100.0
-                    CoroutineScope(IO).launch {sendValues()}
-                }
-            }
+        setThrottleBarListeners()
+        setRudderBarListeners()
+    }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar) {
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-            }
-        })
-
-        // set a listener to the rudder slider
+    /**
+     *  Find and update the value of 'rudder'.
+     */
+    private fun setRudderBarListeners() {
+        /** Set a listener to the rudder slider. */
         rudder_bar.max = 200
         rudder_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
@@ -102,14 +102,16 @@ class ControllersActivity : AppCompatActivity() {
                     if (changedEnough100((i / 100.0) - 1, throttle)) {
                         rudder = (i / 100.0) - 1
 
-                        CoroutineScope(IO).launch{sendValues()}
+                        /** Update the server that a value has changed. */
+                        CoroutineScope(IO).launch { sendValues() }
                     }
                 } else {
                     rudderValue.text = ((i - 100.0) / 100).toString()
                     if (changedEnough100((i - 100.0) / 100, throttle)) {
                         rudder = (i - 100.0) / 100
 
-                        CoroutineScope(IO).launch{sendValues()}
+                        /** Update the server that a value has changed. */
+                        CoroutineScope(IO).launch { sendValues() }
                     }
                 }
             }
@@ -120,9 +122,35 @@ class ControllersActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(p0: SeekBar) {
             }
         })
-
     }
-    // Check if 1% of the value has changed. when 1% = 0.02.
+
+    /**
+     *  Find and update the value of 'throttle'.
+     */
+    private fun setThrottleBarListeners() {
+        /** set a listener to the throttle slider. */
+        throttle_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
+                throttleValue.text = (i / 100.0).toString()
+                if (changedEnough100(i / 100.0, throttle)) {
+                    throttle = i / 100.0
+
+                    /** Update the server that a value has changed. */
+                    CoroutineScope(IO).launch { sendValues() }
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+            }
+        })
+    }
+
+    /**
+     *  Check if 1% of the value has changed. when 1% = 0.02.
+     */
     private fun changedEnough200(newValue: Double, prevValue: Double): Boolean {
         if ((newValue > prevValue) && (newValue - prevValue) >= 0.02) {
             return true
@@ -131,7 +159,10 @@ class ControllersActivity : AppCompatActivity() {
         }
         return false
     }
-    // Check if 1% of the value has changed. when 1% = 0.01.
+
+    /**
+     * Check if 1% of the value has changed. when 1% = 0.01.
+     */
     private fun changedEnough100(newValue: Double, prevValue: Double): Boolean {
         if ((newValue > prevValue) && (newValue - prevValue) >= 0.01) {
             return true
@@ -142,53 +173,46 @@ class ControllersActivity : AppCompatActivity() {
     }
 
 
-    /*
-    A function create to build a retrofit object to make GET request for image
-    from the server.
+    /**
+     * A function create to build a retrofit object to make GET request for image
+     * from the server.
      */
     private fun loadImage() {
-        //val URL = "http://10.0.2.2:5550/"
-
         val client = OkHttpClient.Builder()
             .connectTimeout(100, java.util.concurrent.TimeUnit.SECONDS)
             .readTimeout(100, java.util.concurrent.TimeUnit.SECONDS).build()
-
         val gson = GsonBuilder().setLenient().create()
-
-        val retrofit =  Retrofit.Builder().baseUrl(url)
+        val retrofit = Retrofit.Builder().baseUrl(url)
             .addConverterFactory(GsonConverterFactory.create(gson)).build()
-
-        val api = retrofit.create(GetImageService::class.java)
-
-        val body = api.getImg().enqueue(object: Callback<ResponseBody> {
+        val api = retrofit.create(Api::class.java)
+        val body = api.getImg().enqueue(object : Callback<ResponseBody> {
+            /** In success. */
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                if(response.isSuccessful) {
+                if (response.isSuccessful) {
                     println("OK")
-
                     val inputstream = response?.body()?.byteStream()
                     val bitmap = BitmapFactory.decodeStream(inputstream)
                     runOnUiThread {
                         val imageView = findViewById<ImageView>(R.id.imageView)
                         imageView.setImageBitmap(bitmap)
-                        println("debug:got image succsesfuly")
+                        println("debug:got image successfully")
                     }
-                } else {
+                } else
                     println("NOTOK")
-                }
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                t.printStackTrace()
-                Toast.makeText(applicationContext, "Failed to load new screen",
-                    Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    applicationContext, "Failed to load new screen",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         })
     }
 
-    val handler = CoroutineExceptionHandler { _, exception ->
-        Log.v("Network", "Caught $exception")
-    }
-
+    /**
+     * Loop which ask to load an image in every iteration.
+     */
     private fun loadImageLoop() {
         imageChanged = true
         CoroutineScope(IO).launch(handler) {
@@ -208,7 +232,7 @@ class ControllersActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if(!imageChanged) {
+        if (!imageChanged) {
             loadImage()
         }
     }
@@ -220,28 +244,35 @@ class ControllersActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Make and send a json that contain 4 values to the server
+     */
     private fun sendValues() {
-        val json =  "{\"aileron\": $aileron,\n \"rudder\": $rudder,\n \"elevator\": $elevator,\n \"throttle\": $throttle\n}"
+        val json =
+            "{\"aileron\": $aileron,\n \"rudder\": $rudder,\n \"elevator\": $elevator,\n \"throttle\": $throttle\n}"
         val rb = RequestBody.create(MediaType.parse("application/json"), json)
         val gson = GsonBuilder().setLenient().create()
-        val retrofit = Retrofit.Builder()
-            .baseUrl((url))
-            .addConverterFactory(GsonConverterFactory.create(gson))
-            .build()
-        val api = retrofit.create(GetImageService::class.java)
+        val retrofit = Retrofit.Builder().baseUrl((url))
+            .addConverterFactory(GsonConverterFactory.create(gson)).build()
+        val api = retrofit.create(Api::class.java)
         val body = api.postCommand(rb).enqueue(object : Callback<ResponseBody> {
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                //t.printStackTrace()
-                //Toast.makeText(applicationContext, "Failed to send values",
-                  //  Toast.LENGTH_SHORT).show()
+                if (!t.toString().contains("timeout")) {
+                    t.printStackTrace()
+                    Toast.makeText(
+                        applicationContext, "Failed to send values",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
+
+            /** In success. */
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 try {
                     Log.d("FlightMobileApp", response.body().toString())
                     println("make the update correctly")
 
-                }
-                catch (e: IOException) {
+                } catch (e: IOException) {
                     e.printStackTrace()
                     println("failed to make any post: catch")
 

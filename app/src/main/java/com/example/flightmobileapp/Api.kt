@@ -8,10 +8,11 @@ import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
 
-interface GetImageService {
+interface Api {
     @Headers("Content-Type: image/png")
     @GET("/screenshot")
     fun getImg(): Call<ResponseBody>
+
     @POST("/api/command")
-    fun postCommand(@Body rb : RequestBody): Call<ResponseBody>
+    fun postCommand(@Body rb: RequestBody): Call<ResponseBody>
 }
