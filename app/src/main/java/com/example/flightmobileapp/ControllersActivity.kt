@@ -41,7 +41,7 @@ class ControllersActivity : AppCompatActivity() {
     private var imageChanged = false
     private var url: String = ""
 
-    val handler = CoroutineExceptionHandler { _, exception ->
+    val handler: CoroutineExceptionHandler = CoroutineExceptionHandler { _, exception ->
         Log.v("Network", "Caught $exception")
     }
 
@@ -97,22 +97,19 @@ class ControllersActivity : AppCompatActivity() {
         rudder_bar.max = 200
         rudder_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
+                var rudderVal: Double
                 if (i < 100) {
                     rudderValue.text = ((i / 100.0) - 1).toString()
-                    if (changedEnough100((i / 100.0) - 1, throttle)) {
-                        rudder = (i / 100.0) - 1
-
-                        /** Update the server that a value has changed. */
-                        CoroutineScope(IO).launch { sendValues() }
-                    }
+                    rudderVal = (i / 100.0) - 1
                 } else {
                     rudderValue.text = ((i - 100.0) / 100).toString()
-                    if (changedEnough100((i - 100.0) / 100, throttle)) {
-                        rudder = (i - 100.0) / 100
+                    rudderVal = (i - 100.0) / 100
+                }
+                if (changedEnough100(rudderVal, rudder)) {
+                    rudder = rudderVal
 
-                        /** Update the server that a value has changed. */
-                        CoroutineScope(IO).launch { sendValues() }
-                    }
+                    /** Update the server that a value has changed. */
+                    CoroutineScope(IO).launch { sendValues() }
                 }
             }
 
