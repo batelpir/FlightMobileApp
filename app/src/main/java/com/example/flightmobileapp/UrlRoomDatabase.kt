@@ -10,17 +10,17 @@ import androidx.room.RoomDatabase
 abstract class UrlRoomDatabase : RoomDatabase() {
     abstract fun urlDao(): UrlDao
 
-    // Create a singleton object.
+    /** Create a singleton object. */
     companion object {
         @Volatile
         private var dbInstance: UrlRoomDatabase? = null
 
-        // Return instance of the database. if was not created yet then create one.
+        /** Return instance of the database. if was not created yet then create one. */
         fun getInstance(context: Context): UrlRoomDatabase {
             synchronized(this) {
                 var instance: UrlRoomDatabase? = dbInstance
                 if (instance == null) {
-                    // Create database.
+                    /** Create database. */
                     instance = Room.databaseBuilder(
                         context.applicationContext,
                         UrlRoomDatabase::class.java,

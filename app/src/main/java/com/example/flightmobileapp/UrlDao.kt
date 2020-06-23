@@ -3,7 +3,7 @@ package com.example.flightmobileapp
 import androidx.lifecycle.LiveData
 import androidx.room.*
 
-// SQL queries are associated with method calls.
+/** SQL queries are associated with method calls. */
 @Dao
 interface UrlDao {
 

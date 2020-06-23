@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var urlViewModel: UrlViewModel
 
-    // Init all the necessary components.
+    /** Init all the necessary components. */
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,20 +44,20 @@ class MainActivity : AppCompatActivity() {
         ).get(
             UrlViewModel::class.java
         )
-        // Set observer for urls list.
+        /** Set observer for urls list. */
         urlViewModel.allUrls.observe(this, Observer { urls ->
             urls?.let { adapter.setUrls(it) }
         })
     }
 
-    // Copy the clicked url from the list to the url input text.
+    /** Copy the clicked url from the list to the url input text. */
     public fun insertUrl(view: View) {
         val str = (view as TextView).text.toString()
         val urlInputText = findViewById<EditText>(R.id.urlInput)
         urlInputText.text = Editable.Factory.getInstance().newEditable(str)
     }
 
-    // Insert the url to the db and try to connect to the server.
+    /** Insert the url to the db and try to connect to the server. */
     @RequiresApi(Build.VERSION_CODES.O)
     public fun connectButton(view: View) {
         val url = findViewById<EditText>(R.id.urlInput).text.toString()
@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
         connectToSrv(url)
     }
 
-    // Connect to the server using http get request.
+    /** Connect to the server using http get request. */
     private fun connectToSrv(url: String) {
         //val URL = "http://10.0.2.2:5550/"
         try {
@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
                 .addConverterFactory(GsonConverterFactory.create(gson)).build()
 
             val api = retrofit.create(GetImageService::class.java)
-
+            /** Send a http request for getting screenshot and handle response. */
             val body = api.getImg().enqueue(object: Callback<ResponseBody> {
                 override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                     Toast.makeText(
@@ -112,7 +112,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Move to the next activity after successful connection.
+    /** Move to the next activity after successful connection. */
     private fun openActivity(url: String) {
         val intent = Intent(this, ControllersActivity::class.java)
         intent.putExtra("url", url)

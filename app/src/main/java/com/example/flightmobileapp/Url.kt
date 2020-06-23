@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-// Define urls table.
+/** Define urls table. */
 @Entity(tableName = "urls_table")
 data class Url (
     @PrimaryKey

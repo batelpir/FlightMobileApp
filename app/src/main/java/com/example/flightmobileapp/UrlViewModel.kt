@@ -11,7 +11,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.*
 
-// View model that holds app data in a lifecycle-conscious way that saves configuration changes.
+/** View model that holds app data in a lifecycle-conscious way that saves configuration changes. */
 class UrlViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: UrlRepo
@@ -24,7 +24,7 @@ class UrlViewModel(application: Application) : AndroidViewModel(application) {
         allUrls = repository.allUrls
     }
 
-    // Insert url to db.
+    /** Insert url to db. */
     public fun insert(url: Url) = viewModelScope.launch(Dispatchers.IO) {
         val newUrl: Long = repository.insert(url)
         // If insertion failed
